@@ -4,9 +4,17 @@ import { Search, Menu, User } from 'lucide-react';
 interface NavbarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  onSearch: (query: string) => void;
+  onMobileSearchOpen: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ searchQuery, setSearchQuery }) => {
+const Navbar: React.FC<NavbarProps> = ({ searchQuery, setSearchQuery, onSearch, onMobileSearchOpen }) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSearch(searchQuery);
+    }
+  };
+
   return (
     <nav className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,6 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, setSearchQuery }) => {
                   className="w-[500px] pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:border-red-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               </div>
@@ -42,7 +51,9 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, setSearchQuery }) => {
           </div>
 
           <div className="md:hidden flex items-center">
-            <Search className="h-6 w-6 mr-4" />
+            <button onClick={onMobileSearchOpen} className="mr-4">
+              <Search className="h-6 w-6 text-gray-500" />
+            </button>
             <User className="h-6 w-6" />
           </div>
         </div>

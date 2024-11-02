@@ -23,7 +23,13 @@ const CategoryBar: React.FC<CategoryBarProps> = ({ setCategory, activeCategory }
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setCategory(cat.id)}
+              onClick={() =>
+                {
+                    if(cat.id === 'movie' || cat.id === 'series' || cat.id === 'game' ) {
+                        setCategory(cat.id)
+                    }
+                }
+              }
               className={`whitespace-nowrap text-sm font-medium ${
                 activeCategory === cat.id
                   ? 'text-red-500 border-b-2 border-red-500'

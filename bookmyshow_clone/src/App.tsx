@@ -9,12 +9,41 @@ import MobileNavbar from './components/MobileNavbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import type { Movie } from './types/movie';
 
+// Array of popular movie keywords/genres/franchises
+const movieKeywords = [
+  'star wars',
+  'disney',
+  'pixar',
+  'harry potter',
+  'lord of the rings',
+  'batman',
+  'james bond',
+  'jurassic',
+  'matrix',
+  'indiana jones',
+  'mission impossible',
+  'fast and furious',
+  'transformer',
+  'avenger'
+];
+
+const getRandomKeyword = () => {
+  const randomIndex = Math.floor(Math.random() * movieKeywords.length);
+  return movieKeywords[randomIndex];
+};
+
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState(getRandomKeyword()); 
   const [category, setCategory] = useState('movie');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const handleSearch = (query: string) => {
+    setSearchTerm(query.trim() || getRandomKeyword());
+  };
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -22,12 +51,8 @@ function App() {
       setError(null);
       
       try {
-        const random_movies = ['marvel', 'batman', 'superman', 'spiderman', 'avengers', 'justice league', 'aquaman', 'ends', 'mission', 'james bond', 'harry potter', 'lord of the rings', 'star wars', 'indiana jones', 'jurassic park', 'back to the future', 'terminator', 'die hard', 'matrix', 'mad max', 'rambo', 'rocky', 'predator', 'alien', 'godzilla', 'king kong', 'transformers', 'fast and furious', 'pirates of the caribbean', 'hunger games', 'twilight', 'divergent', 'maze runner', 'hobbit', 'narnia', 'percy jackson', 'sherlock holmes', 'john wick', 'bourne', 'taken', 'equalizer', 'mission impossible', 'jack reacher', 'sherlock', 'lucifer', 'breaking bad', 'game of thrones', 'stranger things', 'walking dead', 'peaky blinders', 'vikings', 'black mirror', 'westworld', 'friends', 'big bang theory', 'how i met your mother', 'brooklyn nine nine', 'office', 'parks and recreation', 'community', 'modern family', 'simpsons', 'family guy', 'south park', 'rick and morty', 'futurama', 'bojack horseman', 'archer', 'venture bros', 'big mouth', 'disenchantment', 'spongebob', 'avatar', 'adventure time', 'regular show', 'steven universe', 'gravity falls', 'phineas and ferb', 'kim possible', 'danny phantom', 'fairly oddparents', 'scooby doo', 'tom and jerry', 'looney'];
-        const random_query = random_movies[Math.floor(Math.random() * random_movies.length)];
-
-        const query = searchQuery.trim() || random_query;
         const response = await axios.get(
-          `https://www.omdbapi.com/?apikey=${import.meta.env.VITE_OMDB_API_KEY}&s=${query}&type=${category}`
+          `https://www.omdbapi.com/?apikey=${import.meta.env.VITE_OMDB_API_KEY}&s=${searchTerm}&type=${category}`
         );
         
         if (response.data.Error) {
@@ -47,9 +72,8 @@ function App() {
       }
     };
 
-    const debounceTimer = setTimeout(fetchMovies, 500);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, category]);
+    fetchMovies();
+  }, [searchTerm, category]);
 
   const renderContent = () => {
     if (loading) {
@@ -67,6 +91,9 @@ function App() {
         <div className="flex flex-col items-center justify-center min-h-[200px] p-4">
           <AlertTriangle className="w-8 h-8 text-red-500 mb-2" />
           <p className="text-gray-600 text-center">{error}</p>
+          {error === 'Movie not found!' && (
+            <p className="text-gray-600 text-center">Change movie name or category</p>
+          )}
         </div>
       );
     }
@@ -91,7 +118,12 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-900">
       <ErrorBoundary>
-        <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <Navbar 
+          searchQuery={searchQuery} 
+          setSearchQuery={setSearchQuery}
+          onSearch={handleSearch}
+          onMobileSearchOpen={() => setIsSearchOpen(true)}
+        />
         <CategoryBar setCategory={setCategory} activeCategory={category} />
         <Carousel />
         
@@ -99,7 +131,13 @@ function App() {
           {renderContent()}
         </main>
 
-        <MobileNavbar />
+        <MobileNavbar 
+          searchQuery={searchQuery} 
+          setSearchQuery={setSearchQuery}
+          onSearch={handleSearch}
+          isSearchOpen={isSearchOpen}
+          setIsSearchOpen={setIsSearchOpen}
+        />
       </ErrorBoundary>
     </div>
   );
