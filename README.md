@@ -6,3 +6,4 @@
 3. run `npm install`
 4. run `npm run dev`
 
+View the live web page here : https://bookmyshow-clone-71173.web.app/
